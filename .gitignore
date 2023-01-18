@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/y4004
+y4004.so
+y4004.dylib
+y4004.dll
+y4004.a
+y4004.lib
+y4004-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

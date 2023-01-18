@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"yeti0904"
+	],
+	"copyright": "Copyright © 2023, yeti0904",
+	"description": "An intel 4004 emulator",
+	"license": "GPL-3.0-or-later",
+	"name": "y4004"
+}
