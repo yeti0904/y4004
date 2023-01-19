@@ -1,8 +1,16 @@
 # y4004
 
+## compile
+```
+dub build
+```
+
+## usage
+run with --help to see usage
+
 ## implemented instructions
 - [X] NOP
-- [X] JCN
+- [ ] JCN
 - [ ] FIM
 - [ ] SRC
 - [ ] FIN

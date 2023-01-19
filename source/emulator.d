@@ -2,32 +2,7 @@ import std.stdio;
 import std.format;
 import std.algorithm;
 import core.stdc.stdlib;
-
-enum NibbleInstructions {
-	NOP = 0b0000,
-	JCN = 0b0001,
-	FIM_SRC = 0b0010,
-	FIN_JIN = 0b0011,
-	JUN = 0b0100,
-	JMS = 0b0101,
-	INC = 0b0110,
-	ISZ = 0b0111,
-	ADD = 0b1000,
-	SUB = 0b1001,
-	LD  = 0b1010,
-	XCH = 0b1011,
-	BBL = 0b1100,
-	LDM = 0b1101
-}
-
-enum ByteInstructions {
-	WRM = 0b11100000,
-	CLB = 0b11110000,
-	CLC = 0b11110001,
-	IAC = 0b11110010,
-	DAC = 0b11111000,
-	STC = 0b11111010
-}
+import intel4004;
 
 struct Registers {
 	ubyte     acc; // accumulator
@@ -101,7 +76,7 @@ class Emulator {
 
 	ubyte ReadRegPair(ubyte pair, ubyte value) {
 		return (
-			(regs.index[pair * 2] << 4) |
+			cast(ubyte) (regs.index[pair * 2] << 4) |
 			regs.index[(pair * 2) + 1]
 		);
 	}
