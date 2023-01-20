@@ -10,6 +10,7 @@ void ErrorBegin(string fname, size_t line, size_t col) {
 	}
 }
 
+// Lexer errors
 void InvalidIntegerError(string fname, size_t line, size_t col, string attempt) {
 	ErrorBegin(fname, line, col);
 	stderr.writefln("Invalid integer: '%s'", attempt);
@@ -25,6 +26,12 @@ void CommaAfterInstructionError(string fname, size_t line, size_t col) {
 	stderr.writeln("Unexpected comma after instruction");
 }
 
+void EmptyLabelError(string fname, size_t line, size_t col) {
+	ErrorBegin(fname, line, col);
+	stderr.writeln("Empty label");
+}
+
+// Assembler errors
 void ExpectedInstructionError(string fname, size_t line, size_t col) {
 	ErrorBegin(fname, line, col);
 	stderr.writeln("Expected instruction");
@@ -38,4 +45,9 @@ void ParametersError(string fname, size_t line, size_t col) {
 void ParameterExpected(string fname, size_t line, size_t col) {
 	ErrorBegin(fname, line, col);
 	stderr.writeln("Parameter expected");
+}
+
+void NonexistantLabelError(string fname, size_t line, size_t col, string name) {
+	ErrorBegin(fname, line, col);
+	stderr.writefln("Non-existent label '%s'", name);
 }

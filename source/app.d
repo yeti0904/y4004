@@ -33,6 +33,17 @@ class App {
 		return instance;
 	}
 
+	void InitEmulator() {
+		emulator = Emulator.Instance();
+		
+		emulator.SetRAMSize(640);
+		emulator.SetROMSize(4096);
+	}
+
+	void InitAssembler() {
+		assembler = Assembler.Instance();
+	}
+
 	void RunEmulator(string fname) {
 		void OnEnd() {
 			writeln(emulator.regs);
@@ -47,10 +58,7 @@ class App {
 			exit(1);
 		}
 	
-		emulator = Emulator.Instance();
-		
-		emulator.SetRAMSize(640);
-		emulator.SetROMSize(4096);
+		InitEmulator();
 
 		emulator.Load(cast(ubyte[]) read(fname));
 
@@ -66,7 +74,7 @@ class App {
 	}
 
 	void RunAssembler(string fname, string outFile) {
-		assembler = Assembler.Instance();
+		InitAssembler();
 
 		try {
 			File(fname, "r");

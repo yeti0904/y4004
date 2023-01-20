@@ -5,10 +5,13 @@ import std.string;
 import core.stdc.stdlib;
 import intel4004;
 import error;
+import util;
 
 enum TokenType {
 	Instruction,
 	Parameter,
+	Label,
+	Identifier,
 	End
 }
 
@@ -41,6 +44,7 @@ struct Token {
 	string toString() {
 		string contents;
 		switch (type) {
+			case TokenType.Label:
 			case TokenType.Instruction: {
 				contents = str;
 				break;
@@ -77,15 +81,22 @@ class Lexer {
 		reading  = "";
 	}
 
-	void AddParameter() {
-		if (!isNumeric(reading)) {
-			InvalidIntegerError(fname, line, col, reading);
-			success = false;
-			return;
-		}
-
-		tokens  ~= Token(TokenType.Parameter, parse!int(reading), fname, line, col);
+	void AddLabel() {
+		tokens  ~= Token(TokenType.Label, reading, fname, line, col);
+		tokens  ~= Token(TokenType.End, "", fname, line, col);
 		reading  = "";
+	}
+
+	void AddParameter() {
+		if (isNumeric(reading)) {
+			tokens  ~= Token(
+				TokenType.Parameter, parse!int(reading), fname, line, col
+			);
+		}
+		else {
+			tokens ~= Token(TokenType.Identifier, reading, fname, line, col);
+		}
+		reading = "";
 	}
 
 	void AddEnd() {
@@ -108,6 +119,16 @@ class Lexer {
 			}
 				
 			switch (code[i]) {
+				case ':': {
+					if (strip(reading) == "") {
+						EmptyLabelError(fname, line, col);
+						success = false;
+						break;
+					}
+
+					AddLabel();
+					break;
+				}
 				case '\n': {
 					if (strip(reading) == "") {
 						break;
@@ -161,8 +182,9 @@ class Lexer {
 }
 
 class Assembler {
-	Lexer   lexer;
-	ubyte[] bin;
+	Lexer          lexer;
+	ubyte[]        bin;
+	ushort[string] symbols;
 
 	this() {
 		lexer = new Lexer();
@@ -180,11 +202,69 @@ class Assembler {
 	}
 
 	void ParameterRequired(size_t i) {
-		if (lexer.tokens[i].type != TokenType.Parameter) {
+		if (
+			(lexer.tokens[i].type != TokenType.Parameter) &&
+			(lexer.tokens[i].type != TokenType.Identifier)
+		) {
 			ParameterExpected(
 				lexer.tokens[i].fname, lexer.tokens[i].line, lexer.tokens[i].col
 			);
 			exit(1);
+		}
+	}
+
+	bool SymbolExists(string name) {
+		return (name in symbols) !is null;
+	}
+
+	void GenerateSymbols() {
+		ushort totalSize = 0;
+		symbols          = null;
+		
+		foreach (i, ref token ; lexer.tokens) {
+			switch (token.type) {
+				case TokenType.Instruction: {
+					Instruction inst = Instruction.FromString(token.str);
+
+					if (inst.size == 2) {
+						totalSize += 1;
+					}
+					else {
+						switch (inst.nibblei) {
+							case NibbleInstructions.JCN:
+							case NibbleInstructions.JUN:
+							case NibbleInstructions.JMS:
+							case NibbleInstructions.ISZ: {
+								totalSize += 2;
+								break;
+							}
+							case NibbleInstructions.FIM_SRC: {
+								switch (LowerString(token.str)) {
+									case "fim": {
+										totalSize += 2;
+										break;
+									}
+									default: {
+										totalSize += 1;
+										break;
+									}
+								}
+								break;
+							}
+							default: {
+								totalSize += 1;
+							}
+						}
+					}
+
+					break;
+				}
+				case TokenType.Label: {
+					symbols[token.str] = totalSize;
+					break;
+				}
+				default: continue;
+			}
 		}
 	}
 
@@ -197,8 +277,16 @@ class Assembler {
 			exit(1);
 		}
 
+		GenerateSymbols();
+
 		for (size_t i = 0; i < lexer.tokens.length; ++i) {
 			auto token = lexer.tokens[i];
+
+			if (token.type == TokenType.Label) {
+				++ i;
+				continue;
+			}
+			
 			if (lexer.tokens[i].type != TokenType.Instruction) {
 				ExpectedInstructionError(token.fname, token.line, token.col);
 				exit(1);
@@ -237,8 +325,31 @@ class Assembler {
 					}
 					case NibbleInstructions.JUN:
 					case NibbleInstructions.JMS: {
+						ushort address;
+					
 						ParameterRequired(i);
-						ushort address = cast(ushort) lexer.tokens[i].integer;
+						
+						switch (lexer.tokens[i].type) {
+							case TokenType.Parameter: {
+								address = cast(ushort) lexer.tokens[i].integer;
+								break;
+							}
+							case TokenType.Identifier: {
+								if (!SymbolExists(lexer.tokens[i].str)) {
+									NonexistantLabelError(
+										lexer.tokens[i].fname,
+										lexer.tokens[i].line, lexer.tokens[i].col,
+										lexer.tokens[i].str
+									);
+									exit(1);
+								}
+							
+								address = symbols[lexer.tokens[i].str];
+								break;
+							}
+							default: assert(0);
+						}
+					
 						bin ~= cast(ubyte) (
 							(cast(ubyte) instruction.nibblei << 4) |
 							(address & 0xF00)
@@ -265,8 +376,28 @@ class Assembler {
 							(cast(ubyte) instruction.nibblei << 4) |
 							(lexer.tokens[i].integer & 0x0F);
 						++ i;
+						
 						ParameterRequired(i);
-						bin ~= cast(ubyte) lexer.tokens[i].integer;
+						switch (lexer.tokens[i].type) {
+							case TokenType.Parameter: {
+								bin ~= cast(ubyte) lexer.tokens[i].integer;
+								break;
+							}
+							case TokenType.Identifier: {
+								if (!SymbolExists(lexer.tokens[i].str)) {
+									NonexistantLabelError(
+										lexer.tokens[i].fname,
+										lexer.tokens[i].line, lexer.tokens[i].col,
+										lexer.tokens[i].str
+									);
+									exit(1);
+								}
+							
+								bin ~= symbols[lexer.tokens[i].str] & 0xFF;
+								break;
+							}
+							default: assert(0);
+						}
 						break;
 					}
 					default: assert(0);
