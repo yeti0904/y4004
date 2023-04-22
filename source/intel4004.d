@@ -49,6 +49,13 @@ enum ByteInstructions {
 	DCL = 0b11111101
 }
 
+enum Condition {
+	INVERT   = 0,
+	ACCZERO  = 2, // accumulator = 0
+	CLONE    = 4, // carry/link = 1
+	TESTZERO = 8  // test pin = 0
+}
+
 class InstructionException : Exception {
 	this(string msg, string file = __FILE__, size_t line = __LINE__) {
 		super(msg, file, line);
@@ -183,5 +190,14 @@ struct Instruction {
 		}
 
 		throw new Exception("BUG!!!");
+	}
+
+	static Instruction FromByte(ubyte b) {
+		if (b >> 4 >= 0b1110) {
+			return Instruction(cast(ByteInstructions) b);
+		}
+		else {
+			return Instruction(cast(NibbleInstructions) b >> 4);
+		}
 	}
 }

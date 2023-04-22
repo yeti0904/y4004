@@ -312,8 +312,50 @@ class Assembler {
 						break;
 					}
 					case NibbleInstructions.JCN: {
-						// TODO
-						assert(0);
+						ubyte condition;
+
+						ParameterRequired(i);
+
+						if (lexer.tokens[i].type != TokenType.Parameter) {
+							IntegerExpected(
+								lexer.tokens[i].fname,
+								lexer.tokens[i].line, lexer.tokens[i].col
+							);
+						}
+
+						condition = lexer.tokens[i].integer & 0x0F;
+
+						++ i;
+						ParameterRequired(i);
+
+						ubyte address;
+						
+						switch (lexer.tokens[i].type) {
+							case TokenType.Parameter: {
+								address = lexer.tokens[i].integer & 0xFF;
+								break;
+							}
+							case TokenType.Identifier: {
+								if (!SymbolExists(lexer.tokens[i].str)) {
+									NonexistantLabelError(
+										lexer.tokens[i].fname,
+										lexer.tokens[i].line, lexer.tokens[i].col,
+										lexer.tokens[i].str
+									);
+									exit(1);
+								}
+							
+								address = symbols[lexer.tokens[i].str] & 0xFF;
+								break;
+							}
+							default: assert(0);
+						}
+
+						bin ~= (cast(ubyte) NibbleInstructions.JCN << 4) |
+							(condition & 0x0F);
+						bin ~= address;
+						
+						break;
 					}
 					case NibbleInstructions.FIM_SRC: {
 						// TODO

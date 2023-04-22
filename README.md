@@ -10,11 +10,11 @@ run with --help to see usage
 
 ## implemented instructions
 - [X] NOP
-- [ ] JCN
-- [ ] FIM
-- [ ] SRC
-- [ ] FIN
-- [ ] JIN
+- [X] JCN
+- [X] FIM
+- [X] SRC
+- [X] FIN
+- [X] JIN
 - [X] JUN
 - [X] JMS
 - [X] INC
@@ -25,7 +25,7 @@ run with --help to see usage
 - [X] XCH
 - [X] BBL
 - [X] LDM
-- [ ] WRM
+- [X] WRM
 - [ ] WMP
 - [ ] WRR
 - [ ] WR0
@@ -33,9 +33,9 @@ run with --help to see usage
 - [ ] WR2
 - [ ] WR3
 - [ ] SBM
-- [ ] RDM
+- [X] RDM
 - [ ] RDR
-- [ ] ADM
+- [X] ADM
 - [ ] RD0
 - [ ] RD1
 - [ ] RD2
@@ -43,14 +43,14 @@ run with --help to see usage
 - [X] CLB
 - [X] CLC
 - [X] IAC
-- [ ] CMC
-- [ ] CMA
-- [ ] RAL
-- [ ] RAR
-- [ ] TCC
+- [X] CMC
+- [X] CMA
+- [X] RAL
+- [X] RAR
+- [X] TCC
 - [X] DAC
-- [ ] TCS
+- [X] TCS
 - [X] STC
-- [ ] DAA
-- [ ] KBP
+- [X] DAA
+- [X] KBP
 - [ ] DCL

@@ -51,3 +51,8 @@ void NonexistantLabelError(string fname, size_t line, size_t col, string name) {
 	ErrorBegin(fname, line, col);
 	stderr.writefln("Non-existent label '%s'", name);
 }
+
+void IntegerExpected(string fname, size_t line, size_t col) {
+	ErrorBegin(fname, line, col);
+	stderr.writeln("Integer expected");
+}

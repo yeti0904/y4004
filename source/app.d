@@ -45,11 +45,6 @@ class App {
 	}
 
 	void RunEmulator(string fname) {
-		void OnEnd() {
-			writeln(emulator.regs);
-			exit(0);
-		}
-
 		try {
 			File(fname, "r");
 		}
@@ -62,15 +57,11 @@ class App {
 
 		emulator.Load(cast(ubyte[]) read(fname));
 
-		while (true) {
-			try {
-				emulator.RunInstruction();
-			}
-			catch (EmulatorException e) {
-				writeln(e.msg);
-				OnEnd();
-			}
+		while (emulator.running) {
+			emulator.RunInstruction();
 		}
+
+		writeln(emulator.regs);
 	}
 
 	void RunAssembler(string fname, string outFile) {
