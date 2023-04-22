@@ -42,6 +42,7 @@ class Emulator {
 	bool      running = true;
 	ubyte     ramAddress;
 	ubyte     romAddress;
+	ubyte     ramCmdLine;
 
 	this() {
 		regs.pc ~= 0;
@@ -271,7 +272,15 @@ class Emulator {
 				Next();
 				break;
 			}
-			case ByteInstructions.DCL: assert(0);
+			case ByteInstructions.DCL: {
+				ramCmdLine = regs.acc & 0b0111;
+				Next();
+				break;
+			}
+			case ByteInstructions.HLT: {
+				running = false;
+				break;
+			}
 			default: assert(0);
 		}
 	}

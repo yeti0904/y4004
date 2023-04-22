@@ -46,7 +46,8 @@ enum ByteInstructions {
 	STC = 0b11111010,
 	DAA = 0b11111011,
 	KBP = 0b11111100,
-	DCL = 0b11111101
+	DCL = 0b11111101,
+	HLT = 0b11111111
 }
 
 enum Condition {
@@ -126,6 +127,7 @@ struct Instruction {
 			case "daa": return Instruction(ByteInstructions.DAA);
 			case "kbp": return Instruction(ByteInstructions.KBP);
 			case "dcl": return Instruction(ByteInstructions.DCL);
+			case "hlt": return Instruction(ByteInstructions.HLT);
 
 			default: throw new InstructionException(
 				format("Unknown instruction %s"), inst

@@ -53,4 +53,6 @@ run with --help to see usage
 - [X] STC
 - [X] DAA
 - [X] KBP
-- [ ] DCL
+- [X] DCL
+
+there is also an extra `hlt` instruction because for some reason the intel 4004 doesn't have that
